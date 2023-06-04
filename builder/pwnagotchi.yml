@@ -53,6 +53,10 @@
           - triggerhappy
           - wpa_supplicant
           - nfs-common
+          - libraspberrypi0
+          - libraspberrypi-dev
+          - libraspberrypi-doc
+          - libraspberrypi-bin
         install:
           - rsync
           - vim
@@ -130,8 +134,8 @@
 
   - name: Add re4son-kernel repo key
     apt_key:
-      url: https://re4son-kernel.com/keys/http/archive-key.asc
-      state: present
+      keyserver: keyserver.ubuntu.com
+      id: 11764EE8AC24832F
 
   - name: Add re4son-kernel repository
     apt_repository:
@@ -208,6 +212,14 @@
       regexp: "#EPD_SIZE=2.0"
       line: "EPD_SIZE=2.0"
 
+  - name: upgrade pip3
+    command: "python3 -m pip install --upgrade pip"
+
+  - name: upgrade setuptools
+    pip:
+      name: setuptools
+      extra_args: --upgrade
+
   - name: collect python pip package list
     command: "pip3 list"
     register: pip_output
@@ -267,7 +279,7 @@
   - name: install pwnagotchi wheel and dependencies
     pip:
       name: "{{ lookup('fileglob', '/usr/local/src/pwnagotchi/dist/pwnagotchi*.whl') }}"
-      extra_args: "--no-cache-dir"
+      extra_args: "--no-cache-dir --ignore-installed"
     when: (pwnagotchigit.changed) or (pip_packages['pwnagotchi'] is undefined) or (pip_packages['pwnagotchi'] != pwnagotchi_version)
 
   - name: download and install pwngrid
